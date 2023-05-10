@@ -24,6 +24,8 @@ public abstract class AbstractWebblogServiceImpl<A extends AbstractWebblog>{
         list.add(object);
     }
 
+
+
     public void remove(A object) {
         list.remove(object);
     }
