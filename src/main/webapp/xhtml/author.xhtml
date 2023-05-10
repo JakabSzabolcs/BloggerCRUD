@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html" xml:lang="en" lang="en">
+<h:head>
+    <title>Authors</title>
+</h:head>
+<body>
+<h:form id="mainForm">
+    <p:growl id="growl" showDetail="true" globalOnly="true"/>
+
+    <p:toolbar>
+        <p:toolbarGroup align="left">
+            <p:commandButton icon="pi pi-plus" value="New" actionListener="#{authorMBean.initNew()}"
+                             update="@form :authorDialog" oncomplete="PF('authorDialog').show()" style="margin-left: 10px;background-color: forestgreen;border: none"/>
+
+            <p:commandButton id="columntToggler" icon="pi pi-table" style="margin-left: 10px"/>
+            <p:columnToggler trigger="columntToggler" datasource="table"/>
+
+            <p:commandButton value="XLS" style="margin-left: 10px">
+                <p:dataExporter target="table" type="xls" fileName="author_xls"/>
+            </p:commandButton>
+            <p:commandButton value="XLXS" style="margin-left: 10px">
+                <p:dataExporter target="table" type="xlsxstream" fileName="author_xlxs"/>
+            </p:commandButton>
+            <p:commandButton value="PDF" style="margin-left: 10px">
+                <p:dataExporter target="table" type="pdf" fileName="author_pdf"/>
+            </p:commandButton>
+            <p:commandButton value="CSV" style="margin-left: 10px">
+                <p:dataExporter target="table" type="csv" fileName="author_csv"/>
+            </p:commandButton>
+
+        </p:toolbarGroup>
+
+        <p:toolbarGroup>
+
+            <p:commandButton rendered="#{authorMBean.selectedWebblog.id!=null}" value="Remove" style="margin-left: 10px; background-color: orangered; border: none"
+                             actionListener="#{authorMBean.remove()}" update="@form">
+                <p:confirm header="Remove" message="Are you sure?"/>
+            </p:commandButton>
+            <p:commandButton rendered="#{authorMBean.selectedWebblog.id!=null}" value="Edit" update="@form :authorDialog" style="margin-left: 10px"
+                             oncomplete="PF('authorDialog').show()">
+            </p:commandButton>
+        </p:toolbarGroup>
+    </p:toolbar>
+    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes"/>
+    </p:confirmDialog>
+
+    <p:dataTable id="table" value="#{authorMBean.list}" var="author" rows="10"
+                 paginator="true" selectionMode="single" selection="#{authorMBean.selectedWebblog}" rowKey="#{author.id}"
+                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                 currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+                 rowsPerPageTemplate="5,10,{ShowAll|'All'}"
+                 styleClass="employeeTable"
+                 headerClass="employeeTableHeader"
+                 rowClasses="employeeTableOddRow,employeeTableEvenRow">
+        <p:ajax event="rowSelect" update="@form"/>
+        <p:ajax event="rowUnselect" listener="#{authorMBean.initNew()}" update="@form"/>
+
+        <p:column headerText="ID" toggleable="false" filterBy="#{author.id}" filterMatchMode="contains" sortBy="#{author.id}">
+            <h:outputText value="#{author.id}"/>
+        </p:column>
+        <p:column filterBy="#{author.firstName} #{author.lastName}" filterMatchMode="contains" sortBy="#{author.firstName} #{author.lastName}">
+            <f:facet name="header">Name</f:facet>
+            <h:outputText value="#{author.firstName} #{author.lastName}"/>
+        </p:column>
+        <p:column filterBy="#{author.username}" filterMatchMode="contains" sortBy="#{author.username}">
+            <f:facet name="header">Username</f:facet>
+            <h:outputText value="#{author.username}"/>
+        </p:column>
+
+        <p:column filterBy="#{author.createdDate}" filterMatchMode="contains" sortBy="#{author.createdDate}">
+            <f:facet name="header">Created Date</f:facet>
+            <h:outputText value="#{author.createdDate.toString().substring(0,11)}"/>
+        </p:column>
+
+        <p:column filterBy="#{author.lastModifiedDate}" filterMatchMode="contains" sortBy="#{author.lastModifiedDate}">
+            <f:facet name="header">Last Modified</f:facet>
+            <h:outputText value="#{author.lastModifiedDate.toString().substring(0,11)}"/>
+        </p:column>
+
+
+    </p:dataTable>
+
+</h:form>
+<p:dialog header="Form" id="authorDialog" widgetVar="authorDialog" modal="true" maximizable="true" closeOnEscape="true" resizable="true" dynamic="true" >
+    <h:form id="authorDialogForm">
+        <p:panelGrid columns="2" layout="grid">
+
+            <p:outputLabel for="firstName" value="Firstname"/>
+            <p:inputText id="firstName" value="#{authorMBean.selectedWebblog.firstName}"/>
+            <p:outputLabel for="lastName" value="Lastname"/>
+            <p:inputText id="lastName" value="#{authorMBean.selectedWebblog.lastName}"/>
+            <p:outputLabel for="username" value="Username"/>
+            <p:inputText id="username" value="#{authorMBean.selectedWebblog.username}"/>
+
+
+
+            <p:commandButton value="Close" oncomplete="PF('authorDialog').hide()">
+            </p:commandButton>
+            <p:commandButton value="Save" actionListener="#{authorMBean.save}" update="@form :mainForm"
+                             oncomplete="PF('authorDialog').hide()">
+            </p:commandButton>
+        </p:panelGrid>
+    </h:form>
+</p:dialog>
+
+</body>
+</html>

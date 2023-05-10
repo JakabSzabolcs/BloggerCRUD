@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:f="http://java.sun.com/jsf/core" xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html" xml:lang="en" lang="en">
+<h:head>
+    <title>Blogposts</title>
+</h:head>
+<body>
+<h:form id="mainForm">
+    <p:growl id="growl" showDetail="true" globalOnly="true"/>
+
+    <p:toolbar>
+        <p:toolbarGroup align="left">
+            <p:commandButton icon="pi pi-plus" value="New" actionListener="#{blogpostMBean.initNew()}"
+                             update="@form :blogpostDialog" oncomplete="PF('blogpostDialog').show()" style="margin-left: 10px;background-color: forestgreen;border: none"/>
+
+            <p:commandButton id="columntToggler" icon="pi pi-table" style="margin-left: 10px"/>
+            <p:columnToggler trigger="columntToggler" datasource="table"/>
+
+            <p:commandButton value="XLS" style="margin-left: 10px">
+                <p:dataExporter target="table" type="xls" fileName="blogpost_xls"/>
+            </p:commandButton>
+            <p:commandButton value="XLXS" style="margin-left: 10px">
+                <p:dataExporter target="table" type="xlsxstream" fileName="blogpost_xlxs"/>
+            </p:commandButton>
+            <p:commandButton value="PDF" style="margin-left: 10px">
+                <p:dataExporter target="table" type="pdf" fileName="blogpost_pdf"/>
+            </p:commandButton>
+            <p:commandButton value="CSV" style="margin-left: 10px" >
+                <p:dataExporter target="table" type="csv" fileName="blogpost_csv"/>
+            </p:commandButton>
+
+        </p:toolbarGroup>
+
+        <p:toolbarGroup>
+
+            <p:commandButton rendered="#{blogpostMBean.selectedWebblog.id!=null}" value="Remove" style="margin-left: 10px; background-color: orangered; border: none"
+                             actionListener="#{blogpostMBean.remove()}" update="@form">
+                <p:confirm header="Remove" message="Are you sure?"/>
+            </p:commandButton>
+            <p:commandButton rendered="#{blogpostMBean.selectedWebblog.id!=null}" value="Edit" update="@form :blogpostDialog" style="margin-left: 10px"
+                             oncomplete="PF('blogpostDialog').show()">
+            </p:commandButton>
+        </p:toolbarGroup>
+    </p:toolbar>
+    <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"/>
+        <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes"/>
+    </p:confirmDialog>
+
+    <p:dataTable id="table" value="#{blogpostMBean.list}" var="blogpost" rows="10"
+                 paginator="true" selectionMode="single" selection="#{blogpostMBean.selectedWebblog}" rowKey="#{blogpost.id}"
+                 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                 currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
+                 rowsPerPageTemplate="5,10,{ShowAll|'All'}"
+                 styleClass="employeeTable"
+                 headerClass="employeeTableHeader"
+                 rowClasses="employeeTableOddRow,employeeTableEvenRow">
+        <p:ajax event="rowSelect" update="@form"/>
+        <p:ajax event="rowUnselect" listener="#{blogpostMBean.initNew()}" update="@form"/>
+
+        <p:column headerText="ID" toggleable="false" filterBy="#{blogpost.id}" filterMatchMode="contains" sortBy="#{blogpost.id}">
+            <h:outputText value="#{blogpost.id}"/>
+        </p:column>
+        <p:column filterBy="#{blogpost.title}" filterMatchMode="contains" sortBy="#{blogpost.title}">
+            <f:facet name="header">Title</f:facet>
+            <h:outputText value="#{blogpost.title}"/>
+        </p:column>
+        <p:column filterBy="#{blogpost.category}" filterMatchMode="contains" sortBy="#{blogpost.category}">
+            <f:facet name="header">Category</f:facet>
+            <h:outputText value="#{blogpost.category}"/>
+        </p:column>
+        <p:column filterBy="#{blogpost.content}" filterMatchMode="contains" sortBy="#{blogpost.content}">
+            <f:facet name="header">Content</f:facet>
+            <h:outputText value="#{blogpost.content}"/>
+        </p:column>
+        <p:column filterBy="#{blogpost.createdDate}" filterMatchMode="contains" sortBy="#{blogpost.createdDate}">
+            <f:facet name="header">Created Date</f:facet>
+            <h:outputText value="#{blogpost.createdDate.toString().substring(0,11)}"/>
+        </p:column>
+
+        <p:column filterBy="#{blogpost.lastModifiedDate}" filterMatchMode="contains" sortBy="#{blogpost.lastModifiedDate}">
+            <f:facet name="header">Last Modified</f:facet>
+            <h:outputText value="#{blogpost.lastModifiedDate.toString().substring(0,11)}"/>
+        </p:column>
+
+        <p:column filterBy="#{blogpost.publishedDate}" filterMatchMode="contains" sortBy="#{blogpost.publishedDate}">
+            <f:facet name="header">Published Date</f:facet>
+            <h:outputText value="#{blogpost.publishedDate.toString().substring(0,11)} "/>
+        </p:column>
+
+    </p:dataTable>
+
+</h:form>
+<p:dialog header="Form" id="blogpostDialog" widgetVar="blogpostDialog" modal="true" maximizable="true" closeOnEscape="true" resizable="true" dynamic="true" >
+    <h:form id="blogpostDialogForm">
+        <p:panelGrid columns="2" layout="grid">
+
+            <p:outputLabel for="title" value="Title"/>
+            <p:inputText id="title" value="#{blogpostMBean.selectedWebblog.title}"/>
+            <p:outputLabel for="category" value="Category"/>
+            <p:inputText id="category" value="#{blogpostMBean.selectedWebblog.category}"/>
+            <p:outputLabel for="content" value="Content"/>
+            <p:inputText id="content" value="#{blogpostMBean.selectedWebblog.content}"/>
+            <p:outputLabel for="publishedDate" value="Published Date"/>
+            <p:datePicker id="publishedDate" value="#{blogpostMBean.selectedWebblog.publishedDate}"/>
+
+
+            <p:commandButton value="Close" oncomplete="PF('blogpostDialog').hide()">
+            </p:commandButton>
+            <p:commandButton value="Save" actionListener="#{blogpostMBean.save}" update="@form :mainForm"
+                             oncomplete="PF('blogpostDialog').hide()">
+            </p:commandButton>
+        </p:panelGrid>
+    </h:form>
+</p:dialog>
+
+</body>
+</html>
